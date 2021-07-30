@@ -530,6 +530,36 @@ spec:
                                   target of a wildcard DNS record used to resolve default
                                   route host names.
                                 type: string
+                          powervs:
+                            description: OpenShift contains settings specific to the
+                              powervs infrastructure provider.
+                            type: object
+                            properties:
+                              apiServerInternalIP:
+                                description: apiServerInternalIP is an IP address to
+                                  contact the Kubernetes API server that can be used
+                                  by components inside the cluster, like kubelets using
+                                  the infrastructure rather than Kubernetes networking.
+                                  It is the IP that the Infrastructure.status.apiServerInternalURI
+                                  points to. It is the IP for a self-hosted load balancer
+                                  in front of the API servers.
+                                type: string
+                              ingressIP:
+                                description: ingressIP is an external IP which routes
+                                  to the default ingress controller. The IP is a suitable
+                                  target of a wildcard DNS record used to resolve default
+                                  route host names.
+                                type: string
+                              nodeDNSIP:
+                                description: nodeDNSIP is the IP address for the internal
+                                  DNS used by the nodes. Unlike the one managed by the
+                                  DNS operator, `+"`"+`NodeDNSIP`+"`"+` provides name resolution
+                                  for the nodes themselves. There is no DNS-as-a-service
+                                  for oVirt deployments. In order to minimize necessary
+                                  changes to the datacenter DNS, a DNS service is hosted
+                                  as a static pod to serve those hostnames to the nodes
+                                  in the cluster.
+                                type: string
                           type:
                             description: type is the underlying infrastructure provider
                               for the cluster. This value controls whether infrastructure
@@ -537,8 +567,8 @@ spec:
                               provisioning, machine creation and deletion, and other
                               integrations are enabled. If None, no infrastructure automation
                               is enabled. Allowed values are "AWS", "Azure", "BareMetal",
-                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt"
-                              and "None". Individual components may not support all
+                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt",
+                              "PowerVS" and "None". Individual components may not support all
                               platforms, and must handle unrecognized platforms as None
                               if they do not support that platform.
                             type: string

@@ -74,6 +74,9 @@ func TestCloudProvider(t *testing.T) {
 	}, {
 		platform: configv1.VSpherePlatformType,
 		res:      "vsphere",
+	}, {
+		platform: configv1.PowerVSPlatformType,
+		res:      "",
 	}}
 	for idx, c := range cases {
 		name := fmt.Sprintf("case #%d", idx)
@@ -274,6 +277,7 @@ var (
 		"none":      "./test_data/controller_config_none.yaml",
 		"vsphere":   "./test_data/controller_config_vsphere.yaml",
 		"kubevirt":  "./test_data/controller_config_kubevirt.yaml",
+		"powervs":   "./test_data/controller_config_powervs.yaml",
 	}
 )
 

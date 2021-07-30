@@ -66,7 +66,7 @@ replace (
 	github.com/godbus/dbus => github.com/godbus/dbus v0.0.0-20190623212516-8a1682060722
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.4.1
 	github.com/opencontainers/runtime-spec => github.com/opencontainers/runtime-spec v0.1.2-0.20190408193819-a1b50f621a48
-	github.com/openshift/api => github.com/openshift/api v0.0.0-20210629145910-15a1cae1fca8
+	github.com/openshift/api => github.com/openshift-powervs/api v0.0.0-20210729234416-b883aff9d9db
 	github.com/openshift/cluster-api => github.com/openshift/cluster-api v0.0.0-20191129101638-b09907ac6668
 	github.com/securego/gosec => github.com/securego/gosec v0.0.0-20190709033609-4b59c948083c
 	k8s.io/api => k8s.io/api v0.21.0-rc.0

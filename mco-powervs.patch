@@ -1,0 +1,212 @@
+diff --git a/manifests/controllerconfig.crd.yaml b/manifests/controllerconfig.crd.yaml
+index 0de4c782..69c44217 100644
+--- a/manifests/controllerconfig.crd.yaml
++++ b/manifests/controllerconfig.crd.yaml
+@@ -360,6 +360,36 @@ spec:
+                                   target of a wildcard DNS record used to resolve default
+                                   route host names.
+                                 type: string
++                          powervs:
++                            description: OpenShift contains settings specific to the
++                              powervs infrastructure provider.
++                            type: object
++                            properties:
++                              apiServerInternalIP:
++                                description: apiServerInternalIP is an IP address to
++                                  contact the Kubernetes API server that can be used
++                                  by components inside the cluster, like kubelets using
++                                  the infrastructure rather than Kubernetes networking.
++                                  It is the IP that the Infrastructure.status.apiServerInternalURI
++                                  points to. It is the IP for a self-hosted load balancer
++                                  in front of the API servers.
++                                type: string
++                              ingressIP:
++                                description: ingressIP is an external IP which routes
++                                  to the default ingress controller. The IP is a suitable
++                                  target of a wildcard DNS record used to resolve default
++                                  route host names.
++                                type: string
++                              nodeDNSIP:
++                                description: nodeDNSIP is the IP address for the internal
++                                  DNS used by the nodes. Unlike the one managed by the
++                                  DNS operator, `NodeDNSIP` provides name resolution
++                                  for the nodes themselves. There is no DNS-as-a-service
++                                  for oVirt deployments. In order to minimize necessary
++                                  changes to the datacenter DNS, a DNS service is hosted
++                                  as a static pod to serve those hostnames to the nodes
++                                  in the cluster.
++                                type: string
+                           type:
+                             description: type is the underlying infrastructure provider
+                               for the cluster. This value controls whether infrastructure
+@@ -367,8 +397,8 @@ spec:
+                               provisioning, machine creation and deletion, and other
+                               integrations are enabled. If None, no infrastructure automation
+                               is enabled. Allowed values are "AWS", "Azure", "BareMetal",
+-                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt"
+-                              and "None". Individual components may not support all
++                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt",
++                              "PowerVS" and "None". Individual components may not support all
+                               platforms, and must handle unrecognized platforms as None
+                               if they do not support that platform.
+                             type: string
+diff --git a/pkg/controller/template/render.go b/pkg/controller/template/render.go
+index d54d4d6c..81590f34 100644
+--- a/pkg/controller/template/render.go
++++ b/pkg/controller/template/render.go
+@@ -147,7 +147,7 @@ func platformStringFromControllerConfigSpec(ic *mcfgv1.ControllerConfigSpec) (st
+ 		return "", fmt.Errorf("cannot generate MachineConfigs when no platformStatus.type is set")
+ 	case platformBase:
+ 		return "", fmt.Errorf("platform _base unsupported")
+-	case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.BareMetalPlatformType, configv1.GCPPlatformType, configv1.OpenStackPlatformType, configv1.LibvirtPlatformType, configv1.OvirtPlatformType, configv1.VSpherePlatformType, configv1.KubevirtPlatformType, configv1.NonePlatformType:
++	case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.BareMetalPlatformType, configv1.GCPPlatformType, configv1.OpenStackPlatformType, configv1.LibvirtPlatformType, configv1.OvirtPlatformType, configv1.VSpherePlatformType, configv1.KubevirtPlatformType, configv1.PowerVSPlatformType, configv1.NonePlatformType:
+ 		return strings.ToLower(string(ic.Infra.Status.PlatformStatus.Type)), nil
+ 	default:
+ 		// platformNone is used for a non-empty, but currently unsupported platform.
+@@ -342,7 +342,7 @@ func cloudProvider(cfg RenderConfig) (interface{}, error) {
+ 		}
+ 
+ 		switch cfg.Infra.Status.PlatformStatus.Type {
+-		case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.OpenStackPlatformType, configv1.VSpherePlatformType:
++		case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.OpenStackPlatformType, configv1.VSpherePlatformType, configv1.PowerVSPlatformType:
+ 			return strings.ToLower(string(cfg.Infra.Status.PlatformStatus.Type)), nil
+ 		case configv1.GCPPlatformType:
+ 			return "gce", nil
+@@ -388,7 +388,7 @@ func cloudConfigFlag(cfg RenderConfig) interface{} {
+ 
+ 	flag := "--cloud-config=/etc/kubernetes/cloud.conf"
+ 	switch cfg.Infra.Status.PlatformStatus.Type {
+-	case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.GCPPlatformType, configv1.OpenStackPlatformType, configv1.VSpherePlatformType:
++	case configv1.AWSPlatformType, configv1.AzurePlatformType, configv1.GCPPlatformType, configv1.OpenStackPlatformType, configv1.VSpherePlatformType, configv1.PowerVSPlatformType:
+ 		return flag
+ 	default:
+ 		return ""
+diff --git a/pkg/controller/template/render_test.go b/pkg/controller/template/render_test.go
+index c40e58c5..0f8354b7 100644
+--- a/pkg/controller/template/render_test.go
++++ b/pkg/controller/template/render_test.go
+@@ -74,6 +74,9 @@ func TestCloudProvider(t *testing.T) {
+ 	}, {
+ 		platform: configv1.VSpherePlatformType,
+ 		res:      "vsphere",
++	}, {
++		platform: configv1.PowerVSPlatformType,
++		res:      "",
+ 	}}
+ 	for idx, c := range cases {
+ 		name := fmt.Sprintf("case #%d", idx)
+@@ -274,6 +277,7 @@ var (
+ 		"none":      "./test_data/controller_config_none.yaml",
+ 		"vsphere":   "./test_data/controller_config_vsphere.yaml",
+ 		"kubevirt":  "./test_data/controller_config_kubevirt.yaml",
++		"powervs":   "./test_data/controller_config_powervs.yaml",
+ 	}
+ )
+ 
+diff --git a/pkg/controller/template/test_data/controller_config_powervs.yaml b/pkg/controller/template/test_data/controller_config_powervs.yaml
+new file mode 100644
+index 00000000..d38696e0
+--- /dev/null
++++ b/pkg/controller/template/test_data/controller_config_powervs.yaml
+@@ -0,0 +1,25 @@
++apiVersion: "machineconfigurations.openshift.io/v1"
++kind: "ControllerConfig"
++spec:
++  clusterDNSIP: "10.3.0.10"
++  cloudProviderConfig: ""
++  etcdInitialCount: 3
++  etcdCAData: ZHVtbXkgZXRjZC1jYQo=
++  rootCAData: ZHVtbXkgcm9vdC1jYQo=
++  pullSecret:
++    data: ZHVtbXkgZXRjZC1jYQo=
++  images:
++    etcd: image/etcd:1
++    setupEtcdEnv: image/setupEtcdEnv:1
++    infraImage: image/infraImage:1
++    kubeClientAgentImage: image/kubeClientAgentImage:1
++  infra:
++    apiVersion: config.openshift.io/v1
++    kind: Infrastructure
++    status:
++      apiServerInternalURI: https://api-int.my-test-cluster.installer.team.coreos.systems:6443
++      apiServerURL: https://api.my-test-cluster.installer.team.coreos.systems:6443
++      etcdDiscoveryDomain: my-test-cluster.installer.team.coreos.systems
++      infrastructureName: my-test-cluster
++      platformStatus:
++        type: "PowerVS"
+diff --git a/pkg/operator/assets/bindata.go b/pkg/operator/assets/bindata.go
+index ffcbfdc5..c36c507f 100644
+--- a/pkg/operator/assets/bindata.go
++++ b/pkg/operator/assets/bindata.go
+@@ -530,6 +530,36 @@ spec:
+                                   target of a wildcard DNS record used to resolve default
+                                   route host names.
+                                 type: string
++                          powervs:
++                            description: OpenShift contains settings specific to the
++                              powervs infrastructure provider.
++                            type: object
++                            properties:
++                              apiServerInternalIP:
++                                description: apiServerInternalIP is an IP address to
++                                  contact the Kubernetes API server that can be used
++                                  by components inside the cluster, like kubelets using
++                                  the infrastructure rather than Kubernetes networking.
++                                  It is the IP that the Infrastructure.status.apiServerInternalURI
++                                  points to. It is the IP for a self-hosted load balancer
++                                  in front of the API servers.
++                                type: string
++                              ingressIP:
++                                description: ingressIP is an external IP which routes
++                                  to the default ingress controller. The IP is a suitable
++                                  target of a wildcard DNS record used to resolve default
++                                  route host names.
++                                type: string
++                              nodeDNSIP:
++                                description: nodeDNSIP is the IP address for the internal
++                                  DNS used by the nodes. Unlike the one managed by the
++                                  DNS operator, `+"`"+`NodeDNSIP`+"`"+` provides name resolution
++                                  for the nodes themselves. There is no DNS-as-a-service
++                                  for oVirt deployments. In order to minimize necessary
++                                  changes to the datacenter DNS, a DNS service is hosted
++                                  as a static pod to serve those hostnames to the nodes
++                                  in the cluster.
++                                type: string
+                           type:
+                             description: type is the underlying infrastructure provider
+                               for the cluster. This value controls whether infrastructure
+@@ -537,8 +567,8 @@ spec:
+                               provisioning, machine creation and deletion, and other
+                               integrations are enabled. If None, no infrastructure automation
+                               is enabled. Allowed values are "AWS", "Azure", "BareMetal",
+-                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt"
+-                              and "None". Individual components may not support all
++                              "GCP", "Libvirt", "OpenStack", "VSphere", "oVirt", "KubeVirt",
++                              "PowerVS" and "None". Individual components may not support all
+                               platforms, and must handle unrecognized platforms as None
+                               if they do not support that platform.
+                             type: string
+diff --git a/templates/common/powervs/units/afterburn-hostname.service.yaml b/templates/common/powervs/units/afterburn-hostname.service.yaml
+new file mode 100644
+index 00000000..bba22132
+--- /dev/null
++++ b/templates/common/powervs/units/afterburn-hostname.service.yaml
+@@ -0,0 +1,18 @@
++name: afterburn-hostname.service
++enabled: true
++contents: |
++  [Unit]
++  Description=Afterburn Hostname
++  # Block services relying on Networking being up.
++  Before=network-online.target
++  # Wait for NetworkManager to report its online
++  After=NetworkManager-wait-online.service
++  # Run before hostname checks
++  Before=node-valid-hostname.service
++
++  [Service]
++  ExecStart=/usr/bin/afterburn --provider powervs --hostname=/etc/hostname
++  Type=oneshot
++
++  [Install]
++  WantedBy=network-online.target
