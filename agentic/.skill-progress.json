@@ -1,0 +1,15 @@
+{
+  "skill_version": "1.0",
+  "started_at": "2026-04-08T17:14:57Z",
+  "phases": {
+    "phase_1_discovery": {"status": "not_started", "completed_at": null},
+    "phase_2_structure": {"status": "complete", "completed_at": "2026-04-08T17:14:57Z"},
+    "phase_2.5_domain_discovery": {"status": "not_started", "completed_at": null, "critical": true},
+    "phase_3_agents_md": {"status": "not_started", "completed_at": null},
+    "phase_4_ecosystem_md": {"status": "not_started", "completed_at": null},
+    "phase_5_component_guides": {"status": "not_started", "completed_at": null},
+    "phase_5.2_adr_extraction": {"status": "not_started", "completed_at": null, "critical": true},
+    "phase_6_architecture": {"status": "not_started", "completed_at": null},
+    "phase_7_validation": {"status": "not_started", "completed_at": null}
+  }
+}
