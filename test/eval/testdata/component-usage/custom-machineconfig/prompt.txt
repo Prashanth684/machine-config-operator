@@ -1,0 +1,10 @@
+DESCRIBE how to create a MachineConfig that sets a fictional kernel parameter called "net.custom.packet_buffer_size=8192" for worker nodes only.
+
+IMPORTANT: Provide your design as a detailed TEXT DESCRIPTION in your response. Do NOT attempt to write files. Just describe the MachineConfig design and approach.
+
+Your description should address:
+- MachineConfig API structure and fields
+- How to target only worker nodes
+- How to set kernel parameters
+- Label selectors and MachineConfigPool targeting
+- Verification approach

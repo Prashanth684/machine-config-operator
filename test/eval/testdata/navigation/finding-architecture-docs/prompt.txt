@@ -1,0 +1,1 @@
+I'm new to the Machine Config Operator codebase. Can you explain the architecture and how the different components interact?

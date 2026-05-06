@@ -1,0 +1,3 @@
+I need to configure kubelet settings for my OpenShift cluster, specifically max pods per node and eviction thresholds.
+
+What API should I use and where can I find documentation on how to configure it?

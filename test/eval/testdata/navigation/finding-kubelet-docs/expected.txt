@@ -1,0 +1,9 @@
+# Expected behaviors for finding-kubelet-docs scenario
+# Tests: Agent navigates to MCO kubelet configuration documentation
+
+Includes Documentation Used section at end of response
+Lists AGENTS.md or CLAUDE.md in Documentation Used
+References at least one file from ./ai-docs/domain/
+Mentions KubeletConfig API or resource
+Describes how to configure kubelet settings
+Provides guidance on max pods or eviction thresholds

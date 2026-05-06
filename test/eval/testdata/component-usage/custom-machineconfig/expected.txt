@@ -1,0 +1,11 @@
+# Expected behaviors for custom-machineconfig scenario
+# Tests: Agent creates MachineConfig using ai-docs patterns
+
+Includes Documentation Used section at end of response
+Lists AGENTS.md or CLAUDE.md in Documentation Used
+References at least one file from ./ai-docs/domain/
+Mentions MachineConfig API or resource
+Describes machineConfigSelector or labels for targeting pools
+Mentions kernel parameters or sysctl configuration
+Describes how to target worker pool specifically
+Does NOT mention existing kernel parameter examples from codebase

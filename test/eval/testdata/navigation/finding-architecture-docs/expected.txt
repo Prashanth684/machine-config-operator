@@ -1,0 +1,9 @@
+# Expected behaviors for finding-architecture-docs scenario
+# Tests: Agent navigates to MCO architecture documentation
+
+Includes Documentation Used section at end of response
+Lists AGENTS.md or CLAUDE.md in Documentation Used
+References at least one file from ./ai-docs/architecture/
+Mentions machine-config-operator component
+Mentions machine-config-controller or machine-config-daemon
+Describes component interactions or data flow
